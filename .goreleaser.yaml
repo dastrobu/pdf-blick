@@ -1,0 +1,131 @@
+# GoReleaser configuration for pdf-mcp
+# https://goreleaser.com
+
+version: 2
+
+# Project metadata
+project_name: pdf-mcp
+
+# Build configuration
+builds:
+  - id: pdf-mcp
+    main: .
+    binary: pdf-mcp
+
+    goos:
+      - darwin
+      - linux
+      - windows
+
+    goarch:
+      - amd64
+      - arm64
+
+    # Build flags
+    flags:
+      - -trimpath
+
+    ldflags:
+      - -s -w
+      - -X main.version={{.Version}}
+      - -X main.commit={{.Commit}}
+      - -X main.date={{.Date}}
+
+    env:
+      - CGO_ENABLED=0
+
+# Archive configuration
+archives:
+  - id: pdf-mcp
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+
+    files:
+      - LICENSE*
+      - README*
+      - CONTRIBUTING*
+
+# Checksums
+checksum:
+  name_template: "{{ .ProjectName }}_{{ .Version }}_checksums.txt"
+  algorithm: sha256
+
+# Homebrew tap formula
+brews:
+  - repository:
+      owner: dastrobu
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+
+    commit_author:
+      name: goreleaserbot
+      email: bot@goreleaser.com
+
+    directory: Formula
+
+    homepage: https://github.com/dastrobu/pdf-mcp
+    description: "MCP server for fast, secure PDF inspection and page rendering"
+
+    license: MIT
+
+    test: |
+      system "#{bin}/pdf-mcp", "--version"
+
+    install: |
+      bin.install "pdf-mcp"
+
+# Release configuration
+release:
+  github:
+    owner: dastrobu
+    name: pdf-mcp
+
+  draft: false
+  prerelease: auto
+
+  name_template: "v{{ .Version }}"
+
+  mode: append
+
+  footer: |
+    ---
+
+    ## 📦 Installation
+
+    ### Homebrew (macOS & Linux)
+
+    ```bash
+    brew tap dastrobu/tap
+    brew install pdf-mcp
+    ```
+
+    ### Binary Download
+
+    Download the pre-compiled binary for your architecture from the assets below:
+    - **macOS (Apple Silicon)**: `pdf-mcp_{{ .Version }}_darwin_arm64.tar.gz`
+    - **macOS (Intel)**: `pdf-mcp_{{ .Version }}_darwin_amd64.tar.gz`
+    - **Linux (x86_64)**: `pdf-mcp_{{ .Version }}_linux_amd64.tar.gz`
+    - **Linux (ARM64)**: `pdf-mcp_{{ .Version }}_linux_arm64.tar.gz`
+    - **Windows (x64)**: `pdf-mcp_{{ .Version }}_windows_amd64.zip`
+    - **Windows (ARM64)**: `pdf-mcp_{{ .Version }}_windows_arm64.zip`
+
+    ### From Source
+
+    ```bash
+    go install github.com/dastrobu/pdf-mcp@v{{ .Version }}
+    ```
+
+    ## 📚 Documentation
+
+    See the [README](https://github.com/dastrobu/pdf-mcp#readme) for configuration and usage instructions.
+
+# Changelog configuration
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^Merge pull request"
+      - "^Merge branch"
