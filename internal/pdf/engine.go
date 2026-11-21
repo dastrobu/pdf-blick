@@ -22,6 +22,8 @@ import (
 	"github.com/klippa-app/go-pdfium/responses"
 	"github.com/klippa-app/go-pdfium/webassembly"
 	"github.com/tetratelabs/wazero"
+	"github.com/tetratelabs/wazero/api"
+	"github.com/tetratelabs/wazero/experimental"
 )
 
 const (
@@ -189,7 +191,9 @@ func (e *Engine) ensureInit() error {
 		cacheDir := filepath.Join(cacheBase, "pdf-mcp", "wazero")
 		_ = os.MkdirAll(cacheDir, 0o755)
 
-		runtimeCfg := wazero.NewRuntimeConfig()
+		runtimeCfg := wazero.NewRuntimeConfig().WithCoreFeatures(
+			api.CoreFeaturesV2 | experimental.CoreFeaturesExceptionHandling,
+		)
 		cache, err := wazero.NewCompilationCacheWithDir(cacheDir)
 		if err == nil {
 			runtimeCfg = runtimeCfg.WithCompilationCache(cache)

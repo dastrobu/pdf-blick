@@ -717,3 +717,63 @@ func TestContextCancellation(t *testing.T) {
 		t.Error("expected error with cancelled context in RenderPage, got nil")
 	}
 }
+
+func TestEngine_A4LetterFixture(t *testing.T) {
+	pdfPath := filepath.Join("..", "..", "testdata", "A4 Letter.pdf")
+	if _, err := os.Stat(pdfPath); err != nil {
+		t.Skipf("testdata/A4 Letter.pdf not found: %v", err)
+	}
+
+	eng := NewEngine()
+	defer eng.Close()
+	ctx := context.Background()
+
+	data, err := eng.ListPages(ctx, pdfPath)
+	if err != nil {
+		t.Fatalf("ListPages failed: %v", err)
+	}
+	if data["page_count"] != 1 {
+		t.Errorf("expected page_count 1, got %v", data["page_count"])
+	}
+
+	meta, ok := data["metadata"].(map[string]string)
+	if !ok {
+		t.Fatalf("expected metadata map, got %T: %v", data["metadata"], data["metadata"])
+	}
+	if meta["title"] != "A4 Letter" {
+		t.Errorf("expected metadata title 'A4 Letter', got %v", meta["title"])
+	}
+
+	layout, ok := data["page_layout"].(map[string]any)
+	if !ok {
+		t.Fatalf("expected page_layout map, got %v", data["page_layout"])
+	}
+	if layout["format"] != "A4" {
+		t.Errorf("expected format A4, got %v", layout["format"])
+	}
+	if layout["orientation"] != "portrait" {
+		t.Errorf("expected orientation portrait, got %v", layout["orientation"])
+	}
+
+	// Render full page at default DPI (150)
+	res, err := eng.RenderPage(ctx, RenderOptions{Path: pdfPath, Page: 1})
+	if err != nil {
+		t.Fatalf("RenderPage failed: %v", err)
+	}
+	if res.Page != 1 {
+		t.Errorf("expected page 1, got %d", res.Page)
+	}
+	if res.TotalPages != 1 {
+		t.Errorf("expected total pages 1, got %d", res.TotalPages)
+	}
+	if res.WidthPx != 1241 || res.HeightPx != 1754 {
+		t.Errorf("expected 1241x1754, got %dx%d", res.WidthPx, res.HeightPx)
+	}
+	img, err := png.Decode(bytes.NewReader(res.PNGBytes))
+	if err != nil {
+		t.Fatalf("failed to decode rendered PNG: %v", err)
+	}
+	if img.Bounds().Dx() != 1241 || img.Bounds().Dy() != 1754 {
+		t.Errorf("expected image bounds 1241x1754, got %v", img.Bounds())
+	}
+}
