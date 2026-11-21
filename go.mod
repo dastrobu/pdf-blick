@@ -7,7 +7,7 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/klippa-app/go-pdfium v1.17.2
 	github.com/modelcontextprotocol/go-sdk v1.8.0
-	github.com/tetratelabs/wazero v1.10.1
+	github.com/tetratelabs/wazero v1.12.0
 )
 
 require (
