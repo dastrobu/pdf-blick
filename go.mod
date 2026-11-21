@@ -5,7 +5,7 @@ go 1.27
 require (
 	github.com/jessevdk/go-flags v1.6.1
 	github.com/joho/godotenv v1.5.1
-	github.com/klippa-app/go-pdfium v1.17.2
+	github.com/klippa-app/go-pdfium v1.21.5
 	github.com/modelcontextprotocol/go-sdk v1.8.0
 	github.com/tetratelabs/wazero v1.12.0
 )
