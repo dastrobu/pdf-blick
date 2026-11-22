@@ -1,15 +1,15 @@
 # AGENTS.md
 
-Instructions and guidelines for AI coding agents working on `pdf-mcp`.
+Instructions and guidelines for AI coding agents working on `pdf-blick`.
 
 ## Overview & Architecture
 
-`pdf-mcp` is a Model Context Protocol (MCP) server providing fast, secure, read-only PDF inspection and page rendering over `stdio`. It runs without external C-library dependencies by utilizing WebAssembly-compiled PDFium (via `wazero`), enabling cross-platform, pure-Go operation without CGO.
+`pdf-blick` is a Model Context Protocol (MCP) server providing fast, secure, read-only PDF inspection and page rendering over `stdio`. It runs without external C-library dependencies by utilizing WebAssembly-compiled PDFium (via `wazero`), enabling cross-platform, pure-Go operation without CGO.
 
 ### Directory Structure
 
 ```
-pdf-mcp/
+pdf-blick/
 ├── main.go                      # Application entrypoint & CLI routing
 ├── Makefile                     # Build & verification recipes
 ├── .goreleaser.yaml             # Cross-platform release configuration
@@ -38,7 +38,7 @@ pdf-mcp/
 
 ### 4. No Hardcoded Bounds or Magic Numbers (CRITICAL)
 - Operational bounds, rendering limits, pagination windows, and tolerances (e.g. max image dimensions, DPI min/max/default, max pages, bookmark/metadata truncation limits, paper format tolerances) must **NEVER** be hardcoded inline as magic numbers in functions.
-- They must always be defined as named constants in `internal/pdf` and exposed as configurable options through `pdf.Config` and `EngineOpts` (CLI flags + `PDF_MCP_*` environment variables in `internal/opts/opts.go`).
+- They must always be defined as named constants in `internal/pdf` and exposed as configurable options through `pdf.Config` and `EngineOpts` (CLI flags + `PDF_BLICK_*` environment variables in `internal/opts/opts.go`).
 
 ### 5. Table-Driven Tests (CRITICAL)
 - **Always prefer table-driven tests:** Unit and integration tests must be written using table-driven test patterns with `t.Run(tc.name, func(t *testing.T) { ... })` whenever testing multiple inputs, variations, parameter combinations, edge cases, or error conditions.
@@ -74,13 +74,13 @@ Each tool is registered with `modelcontextprotocol/go-sdk/mcp`:
 
 ## Security & Sandbox Model
 
-`pdf-mcp` enforces strict path sandboxing:
+`pdf-blick` enforces strict path sandboxing:
 - All paths are evaluated to canonical absolute paths (resolving symlinks).
 - Path traversal outside allowed roots (e.g. `../../etc/passwd`) is denied.
 - By default, the current working directory (`.`) is allowed.
 - Native path expansion: Leading tilde (`~` / `~/...`) and environment variables (`$HOME`, `${USER}`) are expanded automatically.
-- `--root` / `-r` (or `PDF_MCP_ROOT` environment variable, colon-delimited): adds one or more allowed directories or specific file paths.
-- `--no-workdir` (or `PDF_MCP_NO_WORKDIR=true`): disables implicit access to the current working directory, restricting access strictly to paths passed via `--root`.
+- `--root` / `-r` (or `PDF_BLICK_ROOT` environment variable, colon-delimited): adds one or more allowed directories or specific file paths.
+- `--no-workdir` (or `PDF_BLICK_NO_WORKDIR=true`): disables implicit access to the current working directory, restricting access strictly to paths passed via `--root`.
 
 ## Engine Configuration & Operational Limits
 
@@ -88,57 +88,57 @@ Operational bounds and rendering limits can be configured via CLI flags or envir
 
 | Flag | Environment Variable | Default | Description |
 |------|----------------------|---------|-------------|
-| `--default-dpi` | `PDF_MCP_DEFAULT_DPI` | `150` | Default rendering resolution in DPI when not specified |
-| `--min-dpi` | `PDF_MCP_MIN_DPI` | `36` | Minimum allowed rendering resolution in DPI |
-| `--max-dpi` | `PDF_MCP_MAX_DPI` | `600` | Maximum allowed rendering resolution in DPI (auto-zoom cap) |
-| `--max-image-dimension` | `PDF_MCP_MAX_IMAGE_DIMENSION` | `4096` | Maximum width or height in pixels for rendered images |
-| `--default-max-pages` | `PDF_MCP_DEFAULT_MAX_PAGES` | `100` | Default max pages returned by `list_pages` when `end_page` omitted |
-| `--max-pages-window` | `PDF_MCP_MAX_PAGES_WINDOW` | `200` | Maximum page window size per `list_pages` call |
-| `--max-bookmarks` | `PDF_MCP_MAX_BOOKMARKS` | `200` | Maximum bookmark/outline nodes returned by `list_pages` |
-| `--max-attachments` | `PDF_MCP_MAX_ATTACHMENTS` | `50` | Maximum attachment names returned by `list_pages` |
-| `--max-metadata-len` | `PDF_MCP_MAX_METADATA_LEN` | `512` | Maximum character length of metadata values before truncation |
+| `--default-dpi` | `PDF_BLICK_DEFAULT_DPI` | `150` | Default rendering resolution in DPI when not specified |
+| `--min-dpi` | `PDF_BLICK_MIN_DPI` | `36` | Minimum allowed rendering resolution in DPI |
+| `--max-dpi` | `PDF_BLICK_MAX_DPI` | `600` | Maximum allowed rendering resolution in DPI (auto-zoom cap) |
+| `--max-image-dimension` | `PDF_BLICK_MAX_IMAGE_DIMENSION` | `4096` | Maximum width or height in pixels for rendered images |
+| `--default-max-pages` | `PDF_BLICK_DEFAULT_MAX_PAGES` | `100` | Default max pages returned by `list_pages` when `end_page` omitted |
+| `--max-pages-window` | `PDF_BLICK_MAX_PAGES_WINDOW` | `200` | Maximum page window size per `list_pages` call |
+| `--max-bookmarks` | `PDF_BLICK_MAX_BOOKMARKS` | `200` | Maximum bookmark/outline nodes returned by `list_pages` |
+| `--max-attachments` | `PDF_BLICK_MAX_ATTACHMENTS` | `50` | Maximum attachment names returned by `list_pages` |
+| `--max-metadata-len` | `PDF_BLICK_MAX_METADATA_LEN` | `512` | Maximum character length of metadata values before truncation |
 
 ## CLI Usage
 
 ### Server Mode
 ```bash
 # Run over stdio (default allowed root: current directory)
-pdf-mcp run
+pdf-blick run
 
 # Run with custom allowed roots and working directory disabled
-pdf-mcp run --root ~/Documents/Papers -r /Volumes/Shared --no-workdir
+pdf-blick run --root ~/Documents/Papers -r /Volumes/Shared --no-workdir
 
 # Run with debug logging to stderr
-pdf-mcp run --debug
+pdf-blick run --debug
 ```
 
 ### Direct CLI Tool Invocations
 ```bash
 # List pages and metadata
-pdf-mcp tool list_pages --path doc.pdf
+pdf-blick tool list_pages --path doc.pdf
 
 # List pages with pagination window
-pdf-mcp tool list_pages --path doc.pdf --start-page 1 --end-page 50
+pdf-blick tool list_pages --path doc.pdf --start-page 1 --end-page 50
 
 # Render full page to stdout JSON or save directly to a file
-pdf-mcp tool get_page --path doc.pdf --page 1 -o page1.png
+pdf-blick tool get_page --path doc.pdf --page 1 -o page1.png
 
 # Render cropped bounding box (zoom into region)
-pdf-mcp tool get_page --path doc.pdf --page 1 --left 0.1 --top 0.2 --right 0.8 --bottom 0.9 -o crop.png
+pdf-blick tool get_page --path doc.pdf --page 1 --left 0.1 --top 0.2 --right 0.8 --bottom 0.9 -o crop.png
 
 # Render page rotated by 180 degrees (e.g. for upside-down scans)
-pdf-mcp tool get_page --path doc.pdf --page 1 --rotate 180 -o rotated.png
+pdf-blick tool get_page --path doc.pdf --page 1 --rotate 180 -o rotated.png
 ```
 
 ### Bash Completion
 ```bash
-pdf-mcp completion bash > /usr/local/etc/bash_completion.d/pdf-mcp
+pdf-blick completion bash > /usr/local/etc/bash_completion.d/pdf-blick
 ```
 
 ## Build & Testing
 
 ```bash
-make build    # Build binary (pdf-mcp)
+make build    # Build binary (pdf-blick)
 make test     # Run unit tests
 make fmt      # Format code with gofmt
 make vet      # Run go vet

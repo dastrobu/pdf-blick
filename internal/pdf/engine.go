@@ -197,7 +197,7 @@ func (e *Engine) ensureInit() error {
 		if err != nil || cacheBase == "" {
 			cacheBase = os.TempDir()
 		}
-		cacheDir := filepath.Join(cacheBase, "pdf-mcp", "wazero")
+		cacheDir := filepath.Join(cacheBase, "pdf-blick", "wazero")
 		_ = os.MkdirAll(cacheDir, 0o755)
 
 		runtimeCfg := wazero.NewRuntimeConfig().WithCoreFeatures(

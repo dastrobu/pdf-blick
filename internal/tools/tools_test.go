@@ -11,8 +11,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/dastrobu/pdf-mcp/internal/pdf"
-	"github.com/dastrobu/pdf-mcp/internal/sandbox"
+	"github.com/dastrobu/pdf-blick/internal/pdf"
+	"github.com/dastrobu/pdf-blick/internal/sandbox"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
@@ -181,7 +181,6 @@ func TestJSONRoundTrip(t *testing.T) {
 	if emptyOut.DPI != nil || emptyOut.Rotate != nil {
 		t.Fatalf("expected nil DPI and Rotate when omitted, got %v, %v", emptyOut.DPI, emptyOut.Rotate)
 	}
-
 }
 
 const sampleMinimalPDF = `%PDF-1.4
@@ -238,7 +237,7 @@ func TestEndToEndMCPProtocol(t *testing.T) {
 	defer eng.Close()
 
 	srv := mcp.NewServer(&mcp.Implementation{
-		Name:    "pdf-mcp-test",
+		Name:    "pdf-blick-test",
 		Version: "1.0.0",
 	}, nil)
 	RegisterAll(srv, NewHandler(sb, eng))

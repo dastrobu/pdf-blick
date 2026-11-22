@@ -1,6 +1,6 @@
-# Contributing to pdf-mcp
+# Contributing to pdf-blick
 
-Thank you for your interest in contributing to `pdf-mcp`! This document provides guidelines and instructions for contributing.
+Thank you for your interest in contributing to `pdf-blick`! This document provides guidelines and instructions for contributing.
 
 ---
 
@@ -17,13 +17,13 @@ Thank you for your interest in contributing to `pdf-mcp`! This document provides
 1. Fork the repository on GitHub
 2. Clone your fork:
    ```bash
-   git clone https://github.com/YOUR_USERNAME/pdf-mcp.git
-   cd pdf-mcp
+   git clone https://github.com/YOUR_USERNAME/pdf-blick.git
+   cd pdf-blick
    ```
 
 3. Add the upstream repository:
    ```bash
-   git remote add upstream https://github.com/dastrobu/pdf-mcp.git
+   git remote add upstream https://github.com/dastrobu/pdf-blick.git
    ```
 
 4. Install dependencies:
@@ -94,7 +94,7 @@ Always refer to [`AGENTS.md`](AGENTS.md) for full architecture details and desig
 
 ### 4. No Hardcoded Bounds or Magic Numbers (CRITICAL)
 - Operational bounds, rendering limits, pagination windows, and tolerances (e.g. max image dimensions, DPI min/max/default, max pages, bookmark/metadata truncation limits) must **NEVER** be hardcoded inline as magic numbers.
-- They must always be defined as named constants in `internal/pdf` and exposed as configurable options through `pdf.Config` and `EngineOpts` (CLI flags + `PDF_MCP_*` environment variables in `internal/opts/opts.go`).
+- They must always be defined as named constants in `internal/pdf` and exposed as configurable options through `pdf.Config` and `EngineOpts` (CLI flags + `PDF_BLICK_*` environment variables in `internal/opts/opts.go`).
 
 ---
 
@@ -146,4 +146,4 @@ This verifies:
 
 ## License
 
-By contributing to `pdf-mcp`, you agree that your contributions will be licensed under the MIT License.
+By contributing to `pdf-blick`, you agree that your contributions will be licensed under the MIT License.

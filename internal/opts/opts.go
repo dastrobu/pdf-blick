@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/dastrobu/pdf-mcp/internal/pdf"
-	"github.com/dastrobu/pdf-mcp/internal/tools"
+	"github.com/dastrobu/pdf-blick/internal/pdf"
+	"github.com/dastrobu/pdf-blick/internal/tools"
 	"github.com/jessevdk/go-flags"
 	"github.com/joho/godotenv"
 )
 
-// Options defines the top-level command-line options for pdf-mcp.
+// Options defines the top-level command-line options for pdf-blick.
 type Options struct {
 	Version bool `long:"version" short:"v" description:"Show version information and exit"`
 
@@ -21,21 +21,21 @@ type Options struct {
 
 // SandboxOpts defines options for configuring file access sandboxing.
 type SandboxOpts struct {
-	Roots     []string `long:"root" short:"r" env:"PDF_MCP_ROOT" env-delim:":" description:"Allowed root directory or PDF file path (repeatable)"`
-	NoWorkdir bool     `long:"no-workdir" env:"PDF_MCP_NO_WORKDIR" description:"Disallow access to the current working directory; only allow explicit --root paths"`
+	Roots     []string `long:"root" short:"r" env:"PDF_BLICK_ROOT" env-delim:":" description:"Allowed root directory or PDF file path (repeatable)"`
+	NoWorkdir bool     `long:"no-workdir" env:"PDF_BLICK_NO_WORKDIR" description:"Disallow access to the current working directory; only allow explicit --root paths"`
 }
 
 // EngineOpts defines configurable rendering and metadata limits for the PDF engine.
 type EngineOpts struct {
-	DefaultDPI        int `long:"default-dpi" env:"PDF_MCP_DEFAULT_DPI" default:"150" description:"Default rendering resolution in DPI when not specified"`
-	MinDPI            int `long:"min-dpi" env:"PDF_MCP_MIN_DPI" default:"36" description:"Minimum allowed rendering resolution in DPI"`
-	MaxDPI            int `long:"max-dpi" env:"PDF_MCP_MAX_DPI" default:"600" description:"Maximum allowed rendering resolution in DPI (and cap for auto-zoom)"`
-	MaxImageDimension int `long:"max-image-dimension" env:"PDF_MCP_MAX_IMAGE_DIMENSION" default:"4096" description:"Maximum width or height in pixels for a rendered image"`
-	DefaultMaxPages   int `long:"default-max-pages" env:"PDF_MCP_DEFAULT_MAX_PAGES" default:"100" description:"Default maximum number of pages returned by list_pages when end_page is omitted"`
-	MaxPagesWindow    int `long:"max-pages-window" env:"PDF_MCP_MAX_PAGES_WINDOW" default:"200" description:"Maximum number of pages that can be inspected in a single list_pages call"`
-	MaxBookmarks      int `long:"max-bookmarks" env:"PDF_MCP_MAX_BOOKMARKS" default:"200" description:"Maximum number of bookmark nodes returned by list_pages"`
-	MaxAttachments    int `long:"max-attachments" env:"PDF_MCP_MAX_ATTACHMENTS" default:"50" description:"Maximum number of attachment names returned by list_pages"`
-	MaxMetadataLen    int `long:"max-metadata-len" env:"PDF_MCP_MAX_METADATA_LEN" default:"512" description:"Maximum character length of a metadata tag value before truncation"`
+	DefaultDPI        int `long:"default-dpi" env:"PDF_BLICK_DEFAULT_DPI" default:"150" description:"Default rendering resolution in DPI when not specified"`
+	MinDPI            int `long:"min-dpi" env:"PDF_BLICK_MIN_DPI" default:"36" description:"Minimum allowed rendering resolution in DPI"`
+	MaxDPI            int `long:"max-dpi" env:"PDF_BLICK_MAX_DPI" default:"600" description:"Maximum allowed rendering resolution in DPI (and cap for auto-zoom)"`
+	MaxImageDimension int `long:"max-image-dimension" env:"PDF_BLICK_MAX_IMAGE_DIMENSION" default:"4096" description:"Maximum width or height in pixels for a rendered image"`
+	DefaultMaxPages   int `long:"default-max-pages" env:"PDF_BLICK_DEFAULT_MAX_PAGES" default:"100" description:"Default maximum number of pages returned by list_pages when end_page is omitted"`
+	MaxPagesWindow    int `long:"max-pages-window" env:"PDF_BLICK_MAX_PAGES_WINDOW" default:"200" description:"Maximum number of pages that can be inspected in a single list_pages call"`
+	MaxBookmarks      int `long:"max-bookmarks" env:"PDF_BLICK_MAX_BOOKMARKS" default:"200" description:"Maximum number of bookmark nodes returned by list_pages"`
+	MaxAttachments    int `long:"max-attachments" env:"PDF_BLICK_MAX_ATTACHMENTS" default:"50" description:"Maximum number of attachment names returned by list_pages"`
+	MaxMetadataLen    int `long:"max-metadata-len" env:"PDF_BLICK_MAX_METADATA_LEN" default:"512" description:"Maximum character length of a metadata tag value before truncation"`
 }
 
 // ToPDFConfig converts EngineOpts into a pdf.Config.
@@ -57,7 +57,7 @@ func (o EngineOpts) ToPDFConfig() pdf.Config {
 type RunCmd struct {
 	SandboxOpts
 	EngineOpts
-	Debug   bool `long:"debug" env:"PDF_MCP_DEBUG" description:"Enable debug logging of MCP requests and responses to stderr"`
+	Debug   bool `long:"debug" env:"PDF_BLICK_DEBUG" description:"Enable debug logging of MCP requests and responses to stderr"`
 	Handler func() error
 }
 
