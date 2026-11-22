@@ -47,6 +47,13 @@ const (
 	OpaqueWhiteColor       = 0xFFFFFFFF
 	PageFormatTolerancePt  = 3.0
 	AspectRatioTolerance   = 0.05
+
+	RotationAngle0    = 0
+	RotationAngle90   = 90
+	RotationAngle180  = 180
+	RotationAngle270  = 270
+	RotationAngleStep = 90
+	RotationAngleFull = 360
 )
 
 // Config holds runtime configuration options for the PDF engine.
@@ -100,6 +107,7 @@ type RenderOptions struct {
 	Path   string
 	Page   int      // 1-indexed page number (1..page_count)
 	DPI    *int     // optional; nil means auto (150 base DPI, auto-scaled when cropped)
+	Rotate *int     // optional page rotation in degrees clockwise: 0, 90, 180, 270 (nil defaults to 0)
 	Left   *float64 // optional 0.0..1.0 (default 0.0)
 	Top    *float64 // optional 0.0..1.0 (default 0.0)
 	Right  *float64 // optional 0.0..1.0 (default 1.0)
@@ -114,6 +122,7 @@ type RenderResult struct {
 	EffectiveDPI int
 	Page         int
 	TotalPages   int
+	Rotate       int
 	Left         float64
 	Top          float64
 	Right        float64
@@ -784,6 +793,27 @@ func (e *Engine) RenderPage(ctx context.Context, opts RenderOptions) (*RenderRes
 		return nil, fmt.Errorf("invalid vertical crop bounds: top=%f, bottom=%f (must satisfy 0.0 <= top < bottom <= 1.0)", top, bottom)
 	}
 
+	rotDegrees := RotationAngle0
+	if opts.Rotate != nil {
+		if *opts.Rotate%RotationAngleStep != 0 {
+			return nil, fmt.Errorf("invalid rotate angle %d: must be a multiple of %d degrees (%d, %d, %d, %d)",
+				*opts.Rotate, RotationAngleStep, RotationAngle0, RotationAngle90, RotationAngle180, RotationAngle270)
+		}
+		rotDegrees = (*opts.Rotate%RotationAngleFull + RotationAngleFull) % RotationAngleFull
+	}
+
+	var rotEnum enums.FPDF_PAGE_ROTATION
+	switch rotDegrees {
+	case RotationAngle0:
+		rotEnum = enums.FPDF_PAGE_ROTATION_NONE
+	case RotationAngle90:
+		rotEnum = enums.FPDF_PAGE_ROTATION_90_CW
+	case RotationAngle180:
+		rotEnum = enums.FPDF_PAGE_ROTATION_180_CW
+	case RotationAngle270:
+		rotEnum = enums.FPDF_PAGE_ROTATION_270_CW
+	}
+
 	if err := e.ensureInit(); err != nil {
 		return nil, err
 	}
@@ -856,10 +886,17 @@ func (e *Engine) RenderPage(ctx context.Context, opts RenderOptions) (*RenderRes
 	fullW := int(math.Ceil(sizeResp.Width * pxPerPt))
 	fullH := int(math.Ceil(sizeResp.Height * pxPerPt))
 
-	startX := int(math.Round(left * float64(fullW)))
-	startY := int(math.Round(top * float64(fullH)))
-	endX := int(math.Round(right * float64(fullW)))
-	endY := int(math.Round(bottom * float64(fullH)))
+	dispW := fullW
+	dispH := fullH
+	if rotDegrees == RotationAngle90 || rotDegrees == RotationAngle270 {
+		dispW = fullH
+		dispH = fullW
+	}
+
+	startX := int(math.Round(left * float64(dispW)))
+	startY := int(math.Round(top * float64(dispH)))
+	endX := int(math.Round(right * float64(dispW)))
+	endY := int(math.Round(bottom * float64(dispH)))
 
 	cropW := max(1, endX-startX)
 	cropH := max(1, endY-startY)
@@ -870,10 +907,16 @@ func (e *Engine) RenderPage(ctx context.Context, opts RenderOptions) (*RenderRes
 		effectiveDPI = max(1, int(math.Round(float64(effectiveDPI)*downscale)))
 		fullW = int(math.Round(sizeResp.Width * pxPerPt))
 		fullH = int(math.Round(sizeResp.Height * pxPerPt))
-		startX = int(math.Round(left * float64(fullW)))
-		startY = int(math.Round(top * float64(fullH)))
-		endX = int(math.Round(right * float64(fullW)))
-		endY = int(math.Round(bottom * float64(fullH)))
+		dispW = fullW
+		dispH = fullH
+		if rotDegrees == RotationAngle90 || rotDegrees == RotationAngle270 {
+			dispW = fullH
+			dispH = fullW
+		}
+		startX = int(math.Round(left * float64(dispW)))
+		startY = int(math.Round(top * float64(dispH)))
+		endX = int(math.Round(right * float64(dispW)))
+		endY = int(math.Round(bottom * float64(dispH)))
 		cropW = max(1, endX-startX)
 		cropH = max(1, endY-startY)
 		if cropW > e.cfg.MaxImageDimension {
@@ -906,6 +949,13 @@ func (e *Engine) RenderPage(ctx context.Context, opts RenderOptions) (*RenderRes
 		return nil, fmt.Errorf("failed to fill bitmap background: %w", err)
 	}
 
+	renderSizeX := fullW
+	renderSizeY := fullH
+	if rotDegrees == RotationAngle90 || rotDegrees == RotationAngle270 {
+		renderSizeX = fullH
+		renderSizeY = fullW
+	}
+
 	_, err = e.instance.FPDF_RenderPageBitmap(&requests.FPDF_RenderPageBitmap{
 		Bitmap: bm.Bitmap,
 		Page: requests.Page{
@@ -916,9 +966,9 @@ func (e *Engine) RenderPage(ctx context.Context, opts RenderOptions) (*RenderRes
 		},
 		StartX: -startX,
 		StartY: -startY,
-		SizeX:  fullW,
-		SizeY:  fullH,
-		Rotate: enums.FPDF_PAGE_ROTATION_NONE,
+		SizeX:  renderSizeX,
+		SizeY:  renderSizeY,
+		Rotate: rotEnum,
 		Flags:  enums.FPDF_RENDER_FLAG_ANNOT | enums.FPDF_RENDER_FLAG_LCD_TEXT | enums.FPDF_RENDER_FLAG_REVERSE_BYTE_ORDER,
 	})
 	if err != nil {
@@ -953,6 +1003,7 @@ func (e *Engine) RenderPage(ctx context.Context, opts RenderOptions) (*RenderRes
 		EffectiveDPI: effectiveDPI,
 		Page:         opts.Page,
 		TotalPages:   pageCount,
+		Rotate:       rotDegrees,
 		Left:         left,
 		Top:          top,
 		Right:        right,

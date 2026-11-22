@@ -218,10 +218,11 @@ Renders a 1-indexed PDF page or normalized crop region (bounding box) to a PNG i
 - `path` (string, required): Path to the PDF file.
 - `page` (int, required): 1-indexed page number to render.
 - `dpi` (int, optional): Resolution in DPI (36-600). Defaults to 150 for full-page, or auto-scaled up to 600 DPI when zooming into a crop box.
-- `left` (float, optional): Left edge of normalized crop bounding box (0.0 to 1.0, origin at top-left, default 0.0).
-- `top` (float, optional): Top edge of normalized crop bounding box (0.0 to 1.0, origin at top-left, default 0.0).
-- `right` (float, optional): Right edge of normalized crop bounding box (0.0 to 1.0, origin at top-left, default 1.0).
-- `bottom` (float, optional): Bottom edge of normalized crop bounding box (0.0 to 1.0, origin at top-left, default 1.0).
+- `rotate` (int, optional): Page rotation in degrees clockwise (0, 90, 180, 270, default: 0). Applied before cropping so bounding box coordinates apply to the rotated page.
+- `left` (float, optional): Left edge of normalized crop bounding box (0.0 to 1.0, applied after rotation with origin at top-left of the rotated page, default 0.0).
+- `top` (float, optional): Top edge of normalized crop bounding box (0.0 to 1.0, applied after rotation with origin at top-left of the rotated page, default 0.0).
+- `right` (float, optional): Right edge of normalized crop bounding box (0.0 to 1.0, applied after rotation with origin at top-left of the rotated page, default 1.0).
+- `bottom` (float, optional): Bottom edge of normalized crop bounding box (0.0 to 1.0, applied after rotation with origin at top-left of the rotated page, default 1.0).
 
 **Tool Annotations:**
 - `ReadOnlyHint`: `true`
@@ -265,6 +266,9 @@ pdf-mcp tool get_page --path document.pdf --page 1 -o page1.png
 
 # Zoom into a specific region (bounding box)
 pdf-mcp tool get_page --path document.pdf --page 1 --left 0.1 --top 0.2 --right 0.8 --bottom 0.9 -o crop.png
+
+# Render page rotated by 180 degrees (e.g. for upside-down scans)
+pdf-mcp tool get_page --path document.pdf --page 1 --rotate 180 -o page1_rotated.png
 
 # Render to stdout as JSON
 pdf-mcp tool get_page --path document.pdf --page 1

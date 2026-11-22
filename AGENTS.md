@@ -40,6 +40,10 @@ pdf-mcp/
 - Operational bounds, rendering limits, pagination windows, and tolerances (e.g. max image dimensions, DPI min/max/default, max pages, bookmark/metadata truncation limits, paper format tolerances) must **NEVER** be hardcoded inline as magic numbers in functions.
 - They must always be defined as named constants in `internal/pdf` and exposed as configurable options through `pdf.Config` and `EngineOpts` (CLI flags + `PDF_MCP_*` environment variables in `internal/opts/opts.go`).
 
+### 5. Table-Driven Tests (CRITICAL)
+- **Always prefer table-driven tests:** Unit and integration tests must be written using table-driven test patterns with `t.Run(tc.name, func(t *testing.T) { ... })` whenever testing multiple inputs, variations, parameter combinations, edge cases, or error conditions.
+- **Why:** Table-driven tests keep tests idiomatic, readable, maintainable, easily extensible, and ensure consistent assertions across cases.
+
 ## MCP Tools Specification
 
 Each tool is registered with `modelcontextprotocol/go-sdk/mcp`:
@@ -64,7 +68,8 @@ Each tool is registered with `modelcontextprotocol/go-sdk/mcp`:
   - `path` (string, required): Path to the PDF file.
   - `page` (int, required): 1-indexed page number to render.
   - `dpi` (*int, optional): Resolution in DPI (36-600). Defaults to 150 for full-page, or auto-scaled up to 600 DPI when zooming into a crop box.
-  - `left`, `top`, `right`, `bottom` (*float64, optional): Normalized crop coordinates (0.0 to 1.0, origin at top-left).
+  - `rotate` (*int, optional): Page rotation in degrees clockwise (0, 90, 180, 270, default: 0). Applied before cropping so bounding box coordinates apply to the rotated page.
+  - `left`, `top`, `right`, `bottom` (*float64, optional): Normalized crop coordinates (0.0 to 1.0, applied after rotation with origin at top-left of the rotated page).
 - **Output:** `*mcp.CallToolResult` containing `&mcp.ImageContent{ Data: pngBytes, MIMEType: "image/png" }`.
 
 ## Security & Sandbox Model
@@ -120,6 +125,9 @@ pdf-mcp tool get_page --path doc.pdf --page 1 -o page1.png
 
 # Render cropped bounding box (zoom into region)
 pdf-mcp tool get_page --path doc.pdf --page 1 --left 0.1 --top 0.2 --right 0.8 --bottom 0.9 -o crop.png
+
+# Render page rotated by 180 degrees (e.g. for upside-down scans)
+pdf-mcp tool get_page --path doc.pdf --page 1 --rotate 180 -o rotated.png
 ```
 
 ### Bash Completion
