@@ -1,8 +1,8 @@
 package tools
 
 import (
-	"github.com/dastrobu/pdf-mcp/internal/pdf"
-	"github.com/dastrobu/pdf-mcp/internal/sandbox"
+	"github.com/dastrobu/pdf-blick/internal/pdf"
+	"github.com/dastrobu/pdf-blick/internal/sandbox"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
@@ -20,7 +20,7 @@ func NewHandler(sb *sandbox.Sandbox, eng *pdf.Engine) *Handler {
 	}
 }
 
-// RegisterAll registers all pdf-mcp tools with the given MCP server.
+// RegisterAll registers all pdf-blick tools with the given MCP server.
 func RegisterAll(srv *mcp.Server, h *Handler) {
 	h.RegisterListPages(srv)
 	h.RegisterGetPage(srv)

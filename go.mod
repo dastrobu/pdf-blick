@@ -1,4 +1,4 @@
-module github.com/dastrobu/pdf-mcp
+module github.com/dastrobu/pdf-blick
 
 go 1.27
 

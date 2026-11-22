@@ -1,6 +1,6 @@
 # Release Process
 
-This document describes how to create and publish a new release of `pdf-mcp`.
+This document describes how to create and publish a new release of `pdf-blick`.
 
 ---
 
@@ -13,7 +13,7 @@ This document describes how to create and publish a new release of `pdf-mcp`.
 2. **GitHub Personal Access Token for Homebrew**:
    - A GitHub Personal Access Token (classic) with `repo` scope.
    - Stored as a secret named `HOMEBREW_TAP_GITHUB_TOKEN` in the repository settings:
-     `https://github.com/dastrobu/pdf-mcp/settings/secrets/actions`
+     `https://github.com/dastrobu/pdf-blick/settings/secrets/actions`
 
 ---
 
@@ -30,7 +30,7 @@ make check
 ```
 
 Verify that the CI workflow has passed on GitHub:
-https://github.com/dastrobu/pdf-mcp/actions
+https://github.com/dastrobu/pdf-blick/actions
 
 ### 2. Test GoReleaser Locally (Optional Dry-Run)
 
@@ -79,22 +79,22 @@ Pushing the tag triggers `.github/workflows/release.yaml`:
 
 #### Check GitHub Release
 
-1. Navigate to: https://github.com/dastrobu/pdf-mcp/releases
+1. Navigate to: https://github.com/dastrobu/pdf-blick/releases
 2. Verify release notes and check all artifacts:
-   - `pdf-mcp_v0.1.0_darwin_amd64.tar.gz`
-   - `pdf-mcp_v0.1.0_darwin_arm64.tar.gz`
-   - `pdf-mcp_v0.1.0_linux_amd64.tar.gz`
-   - `pdf-mcp_v0.1.0_linux_arm64.tar.gz`
-   - `pdf-mcp_v0.1.0_windows_amd64.zip`
-   - `pdf-mcp_v0.1.0_windows_arm64.zip`
-   - `pdf-mcp_v0.1.0_checksums.txt`
+   - `pdf-blick_v0.1.0_darwin_amd64.tar.gz`
+   - `pdf-blick_v0.1.0_darwin_arm64.tar.gz`
+   - `pdf-blick_v0.1.0_linux_amd64.tar.gz`
+   - `pdf-blick_v0.1.0_linux_arm64.tar.gz`
+   - `pdf-blick_v0.1.0_windows_amd64.zip`
+   - `pdf-blick_v0.1.0_windows_arm64.zip`
+   - `pdf-blick_v0.1.0_checksums.txt`
 
 #### Test Homebrew Installation
 
 ```bash
 brew tap dastrobu/tap
-brew install pdf-mcp
-pdf-mcp --version
+brew install pdf-blick
+pdf-blick --version
 ```
 
 ---
@@ -119,10 +119,6 @@ git push origin v0.1.0
 
 ---
 
-## Semantic Versioning
+## Architecture Reference
 
-Follow [Semantic Versioning 2.0.0](https://semver.org/):
-
-- **MAJOR** (`v1.0.0` → `v2.0.0`): Incompatible breaking API or schema changes.
-- **MINOR** (`v1.0.0` → `v1.1.0`): New backward-compatible tools or features.
-- **PATCH** (`v1.0.0` → `v1.0.1`): Backward-compatible bug fixes and optimizations.
+For critical rules, struct tags, and design patterns, see [`AGENTS.md`](AGENTS.md).

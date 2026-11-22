@@ -9,12 +9,12 @@ import (
 	"log"
 	"os"
 
-	"github.com/dastrobu/pdf-mcp/internal/completion"
-	applog "github.com/dastrobu/pdf-mcp/internal/log"
-	"github.com/dastrobu/pdf-mcp/internal/opts"
-	"github.com/dastrobu/pdf-mcp/internal/pdf"
-	"github.com/dastrobu/pdf-mcp/internal/sandbox"
-	"github.com/dastrobu/pdf-mcp/internal/tools"
+	"github.com/dastrobu/pdf-blick/internal/completion"
+	applog "github.com/dastrobu/pdf-blick/internal/log"
+	"github.com/dastrobu/pdf-blick/internal/opts"
+	"github.com/dastrobu/pdf-blick/internal/pdf"
+	"github.com/dastrobu/pdf-blick/internal/sandbox"
+	"github.com/dastrobu/pdf-blick/internal/tools"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
@@ -26,7 +26,7 @@ var (
 )
 
 const (
-	serverName = "pdf-mcp"
+	serverName = "pdf-blick"
 )
 
 func main() {
@@ -49,7 +49,7 @@ func main() {
 
 	// Handle version flag
 	if opts.GlobalOpts.Version {
-		fmt.Printf("pdf-mcp version %s\n", version)
+		fmt.Printf("pdf-blick version %s\n", version)
 		fmt.Printf("  commit: %s\n", commit)
 		fmt.Printf("  built:  %s\n", date)
 		return
@@ -131,7 +131,7 @@ func run(options *opts.RunCmd) error {
 	defer eng.Close()
 	eng.Warmup()
 
-	log.Printf("pdf-mcp v%s (commit: %s, built: %s) initialized\n", version, commit, date)
+	log.Printf("pdf-blick v%s (commit: %s, built: %s) initialized\n", version, commit, date)
 	log.Printf("Allowed roots: %v (no-workdir: %v)\n", sb.AllowedRoots(), options.NoWorkdir)
 
 	srv := createServer(sb, eng, options.Debug)

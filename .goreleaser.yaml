@@ -1,16 +1,16 @@
-# GoReleaser configuration for pdf-mcp
+# GoReleaser configuration for pdf-blick
 # https://goreleaser.com
 
 version: 2
 
 # Project metadata
-project_name: pdf-mcp
+project_name: pdf-blick
 
 # Build configuration
 builds:
-  - id: pdf-mcp
+  - id: pdf-blick
     main: .
-    binary: pdf-mcp
+    binary: pdf-blick
 
     goos:
       - darwin
@@ -36,7 +36,7 @@ builds:
 
 # Archive configuration
 archives:
-  - id: pdf-mcp
+  - id: pdf-blick
     name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
 
     format_overrides:
@@ -66,22 +66,22 @@ brews:
 
     directory: Formula
 
-    homepage: https://github.com/dastrobu/pdf-mcp
+    homepage: https://github.com/dastrobu/pdf-blick
     description: "MCP server for fast, secure PDF inspection and page rendering"
 
     license: MIT
 
     test: |
-      system "#{bin}/pdf-mcp", "--version"
+      system "#{bin}/pdf-blick", "--version"
 
     install: |
-      bin.install "pdf-mcp"
+      bin.install "pdf-blick"
 
 # Release configuration
 release:
   github:
     owner: dastrobu
-    name: pdf-mcp
+    name: pdf-blick
 
   draft: false
   prerelease: auto
@@ -99,28 +99,28 @@ release:
 
     ```bash
     brew tap dastrobu/tap
-    brew install pdf-mcp
+    brew install pdf-blick
     ```
 
     ### Binary Download
 
     Download the pre-compiled binary for your architecture from the assets below:
-    - **macOS (Apple Silicon)**: `pdf-mcp_{{ .Version }}_darwin_arm64.tar.gz`
-    - **macOS (Intel)**: `pdf-mcp_{{ .Version }}_darwin_amd64.tar.gz`
-    - **Linux (x86_64)**: `pdf-mcp_{{ .Version }}_linux_amd64.tar.gz`
-    - **Linux (ARM64)**: `pdf-mcp_{{ .Version }}_linux_arm64.tar.gz`
-    - **Windows (x64)**: `pdf-mcp_{{ .Version }}_windows_amd64.zip`
-    - **Windows (ARM64)**: `pdf-mcp_{{ .Version }}_windows_arm64.zip`
+    - **macOS (Apple Silicon)**: `pdf-blick_{{ .Version }}_darwin_arm64.tar.gz`
+    - **macOS (Intel)**: `pdf-blick_{{ .Version }}_darwin_amd64.tar.gz`
+    - **Linux (x86_64)**: `pdf-blick_{{ .Version }}_linux_amd64.tar.gz`
+    - **Linux (ARM64)**: `pdf-blick_{{ .Version }}_linux_arm64.tar.gz`
+    - **Windows (x64)**: `pdf-blick_{{ .Version }}_windows_amd64.zip`
+    - **Windows (ARM64)**: `pdf-blick_{{ .Version }}_windows_arm64.zip`
 
     ### From Source
 
     ```bash
-    go install github.com/dastrobu/pdf-mcp@v{{ .Version }}
+    go install github.com/dastrobu/pdf-blick@v{{ .Version }}
     ```
 
     ## 📚 Documentation
 
-    See the [README](https://github.com/dastrobu/pdf-mcp#readme) for configuration and usage instructions.
+    See the [README](https://github.com/dastrobu/pdf-blick#readme) for configuration and usage instructions.
 
 # Changelog configuration
 changelog:

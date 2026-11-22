@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/dastrobu/pdf-mcp/internal/pdf"
+	"github.com/dastrobu/pdf-blick/internal/pdf"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
@@ -38,22 +38,22 @@ func (h *Handler) RegisterGetPage(srv *mcp.Server) {
 	)
 }
 
-// HandleGetPage validates the input path against the sandbox and renders the requested page or bounding box.
-func (h *Handler) HandleGetPage(ctx context.Context, req *mcp.CallToolRequest, input GetPageInput) (*mcp.CallToolResult, any, error) {
+// HandleGetPage implements the handler logic for the get_page tool.
+func (h *Handler) HandleGetPage(ctx context.Context, _ *mcp.CallToolRequest, input GetPageInput) (*mcp.CallToolResult, any, error) {
 	if h.Sandbox == nil {
 		return nil, nil, fmt.Errorf("sandbox not initialized")
 	}
-	canonicalPath, err := h.Sandbox.ValidatePath(input.Path)
-	if err != nil {
-		return nil, nil, fmt.Errorf("path validation failed: %w", err)
-	}
-
 	if h.Engine == nil {
 		return nil, nil, fmt.Errorf("pdf engine not initialized")
 	}
 
-	res, err := h.Engine.RenderPage(ctx, pdf.RenderOptions{
-		Path:   canonicalPath,
+	absPath, err := h.Sandbox.ValidatePath(input.Path)
+	if err != nil {
+		return nil, nil, fmt.Errorf("access denied for path %q: %w", input.Path, err)
+	}
+
+	renderOpts := pdf.RenderOptions{
+		Path:   absPath,
 		Page:   input.Page,
 		DPI:    input.DPI,
 		Rotate: input.Rotate,
@@ -61,17 +61,21 @@ func (h *Handler) HandleGetPage(ctx context.Context, req *mcp.CallToolRequest, i
 		Top:    input.Top,
 		Right:  input.Right,
 		Bottom: input.Bottom,
-	})
+	}
+
+	res, err := h.Engine.RenderPage(ctx, renderOpts)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to render page: %w", err)
 	}
 
-	return &mcp.CallToolResult{
+	callResult := &mcp.CallToolResult{
 		Content: []mcp.Content{
 			&mcp.ImageContent{
 				Data:     res.PNGBytes,
 				MIMEType: "image/png",
 			},
 		},
-	}, nil, nil
+	}
+
+	return callResult, nil, nil
 }

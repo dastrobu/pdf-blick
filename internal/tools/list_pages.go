@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/dastrobu/pdf-mcp/internal/pdf"
+	"github.com/dastrobu/pdf-blick/internal/pdf"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
@@ -33,21 +33,21 @@ func (h *Handler) RegisterListPages(srv *mcp.Server) {
 	)
 }
 
-// HandleListPages validates the path against the sandbox and retrieves page metadata using the engine.
-func (h *Handler) HandleListPages(ctx context.Context, req *mcp.CallToolRequest, input ListPagesInput) (*mcp.CallToolResult, any, error) {
+// HandleListPages implements the handler logic for the list_pages tool.
+func (h *Handler) HandleListPages(ctx context.Context, _ *mcp.CallToolRequest, input ListPagesInput) (*mcp.CallToolResult, any, error) {
 	if h.Sandbox == nil {
 		return nil, nil, fmt.Errorf("sandbox not initialized")
 	}
-	canonicalPath, err := h.Sandbox.ValidatePath(input.Path)
-	if err != nil {
-		return nil, nil, fmt.Errorf("path validation failed: %w", err)
-	}
-
 	if h.Engine == nil {
 		return nil, nil, fmt.Errorf("pdf engine not initialized")
 	}
 
-	data, err := h.Engine.ListPages(ctx, canonicalPath, pdf.ListPagesOptions{
+	absPath, err := h.Sandbox.ValidatePath(input.Path)
+	if err != nil {
+		return nil, nil, fmt.Errorf("access denied for path %q: %w", input.Path, err)
+	}
+
+	data, err := h.Engine.ListPages(ctx, absPath, pdf.ListPagesOptions{
 		StartPage: input.StartPage,
 		EndPage:   input.EndPage,
 	})

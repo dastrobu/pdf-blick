@@ -1,8 +1,8 @@
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+## Table of Contents
 
-- [pdf-mcp](#pdf-mcp)
+- [pdf-blick](#pdf-blick)
   - [Features](#features)
   - [Installation](#installation)
     - [Homebrew (macOS & Linux)](#homebrew-macos--linux)
@@ -24,11 +24,11 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# pdf-mcp
+# pdf-blick
 
 A fast, secure Model Context Protocol (MCP) server for PDF inspection and high-fidelity page rendering over `stdio`.
 
-Built with pure Go and WebAssembly-compiled PDFium (via [wazero](https://github.com/tetratelabs/wazero)), `pdf-mcp` runs without CGO, external C library dependencies, or system PDFium installations.
+Built with pure Go and WebAssembly-compiled PDFium (via [wazero](https://github.com/tetratelabs/wazero)), `pdf-blick` runs without CGO, external C library dependencies, or system PDFium installations.
 
 ---
 
@@ -48,37 +48,37 @@ Built with pure Go and WebAssembly-compiled PDFium (via [wazero](https://github.
 
 ```bash
 brew tap dastrobu/tap
-brew install pdf-mcp
+brew install pdf-blick
 ```
 
 ### From Source
 
 ```bash
-git clone https://github.com/dastrobu/pdf-mcp.git
-cd pdf-mcp
+git clone https://github.com/dastrobu/pdf-blick.git
+cd pdf-blick
 make build
 ```
 
-This generates the `pdf-mcp` binary in the current directory.
+This generates the `pdf-blick` binary in the current directory.
 
 Or install directly via `go install`:
 
 ```bash
-go install github.com/dastrobu/pdf-mcp@latest
+go install github.com/dastrobu/pdf-blick@latest
 ```
 
 ---
 
 ## Security & Sandbox Model
 
-`pdf-mcp` enforces strict path sandboxing to protect host filesystems:
+`pdf-blick` enforces strict path sandboxing to protect host filesystems:
 
 - Paths are resolved to canonical absolute paths (symlinks resolved).
 - Access to files outside allowed roots is denied.
 - By default, the current working directory (`.`) is allowed.
-- `--root` / `-r` (or `PDF_MCP_ROOT` environment variable, colon-delimited): adds one or more allowed directories or specific file paths. Can be specified multiple times.
-- `--no-workdir` (or `PDF_MCP_NO_WORKDIR=true`): disables implicit access to the current working directory, restricting access strictly to paths passed via `--root`.
-- **Native Path Expansion:** Paths passed via `--root`, `PDF_MCP_ROOT`, or tool input arguments automatically expand leading tildes (`~` / `~/...`) to the user's home directory and expand environment variables (e.g. `$HOME`, `${USER}`).
+- `--root` / `-r` (or `PDF_BLICK_ROOT` environment variable, colon-delimited): adds one or more allowed directories or specific file paths. Can be specified multiple times.
+- `--no-workdir` (or `PDF_BLICK_NO_WORKDIR=true`): disables implicit access to the current working directory, restricting access strictly to paths passed via `--root`.
+- **Native Path Expansion:** Paths passed via `--root`, `PDF_BLICK_ROOT`, or tool input arguments automatically expand leading tildes (`~` / `~/...`) to the user's home directory and expand environment variables (e.g. `$HOME`, `${USER}`).
 
 ---
 
@@ -88,15 +88,15 @@ All operational bounds, rendering limits, and pagination windows can be customiz
 
 | Flag | Environment Variable | Default | Description |
 |------|----------------------|---------|-------------|
-| `--default-dpi` | `PDF_MCP_DEFAULT_DPI` | `150` | Default rendering resolution in DPI when not specified |
-| `--min-dpi` | `PDF_MCP_MIN_DPI` | `36` | Minimum allowed rendering resolution in DPI |
-| `--max-dpi` | `PDF_MCP_MAX_DPI` | `600` | Maximum allowed rendering resolution in DPI (auto-zoom cap) |
-| `--max-image-dimension` | `PDF_MCP_MAX_IMAGE_DIMENSION` | `4096` | Maximum width or height in pixels for rendered images |
-| `--default-max-pages` | `PDF_MCP_DEFAULT_MAX_PAGES` | `100` | Default max pages returned by `list_pages` when `end_page` omitted |
-| `--max-pages-window` | `PDF_MCP_MAX_PAGES_WINDOW` | `200` | Maximum page window size per `list_pages` call |
-| `--max-bookmarks` | `PDF_MCP_MAX_BOOKMARKS` | `200` | Maximum bookmark/outline nodes returned by `list_pages` |
-| `--max-attachments` | `PDF_MCP_MAX_ATTACHMENTS` | `50` | Maximum attachment names returned by `list_pages` |
-| `--max-metadata-len` | `PDF_MCP_MAX_METADATA_LEN` | `512` | Maximum character length of metadata values before truncation |
+| `--default-dpi` | `PDF_BLICK_DEFAULT_DPI` | `150` | Default rendering resolution in DPI when not specified |
+| `--min-dpi` | `PDF_BLICK_MIN_DPI` | `36` | Minimum allowed rendering resolution in DPI |
+| `--max-dpi` | `PDF_BLICK_MAX_DPI` | `600` | Maximum allowed rendering resolution in DPI (auto-zoom cap) |
+| `--max-image-dimension` | `PDF_BLICK_MAX_IMAGE_DIMENSION` | `4096` | Maximum width or height in pixels for rendered images |
+| `--default-max-pages` | `PDF_BLICK_DEFAULT_MAX_PAGES` | `100` | Default max pages returned by `list_pages` when `end_page` omitted |
+| `--max-pages-window` | `PDF_BLICK_MAX_PAGES_WINDOW` | `200` | Maximum page window size per `list_pages` call |
+| `--max-bookmarks` | `PDF_BLICK_MAX_BOOKMARKS` | `200` | Maximum bookmark/outline nodes returned by `list_pages` |
+| `--max-attachments` | `PDF_BLICK_MAX_ATTACHMENTS` | `50` | Maximum attachment names returned by `list_pages` |
+| `--max-metadata-len` | `PDF_BLICK_MAX_METADATA_LEN` | `512` | Maximum character length of metadata values before truncation |
 
 ---
 
@@ -104,13 +104,13 @@ All operational bounds, rendering limits, and pagination windows can be customiz
 
 ### Claude Desktop
 
-Add `pdf-mcp` to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS):
+Add `pdf-blick` to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS):
 
 ```json
 {
   "mcpServers": {
     "pdf": {
-      "command": "/usr/local/bin/pdf-mcp",
+      "command": "/usr/local/bin/pdf-blick",
       "args": [
         "run",
         "--root",
@@ -123,32 +123,32 @@ Add `pdf-mcp` to `~/Library/Application Support/Claude/claude_desktop_config.jso
 
 ### Zed Editor
 
-Add `pdf-mcp` to your Zed settings (`~/.config/zed/settings.json`):
+Add `pdf-blick` to your Zed settings (`~/.config/zed/settings.json`):
 
 ```json
 {
   "context_servers": {
-    "pdf-mcp": {
+    "pdf-blick": {
       "enabled": true,
-      "command": "pdf-mcp",
+      "command": "pdf-blick",
       "args": ["run", "--root", "~/Documents/Papers"]
     }
   }
 }
 ```
 
-#### How `pdf-mcp` Behaves in Zed (Single-Repo & Multi-Repo Workspaces)
+#### How `pdf-blick` Behaves in Zed (Single-Repo & Multi-Repo Workspaces)
 
-When using `pdf-mcp` as a context server inside Zed, keep the following runtime behaviors in mind:
+When using `pdf-blick` as a context server inside Zed, keep the following runtime behaviors in mind:
 
 1. **Working Directory (`cwd`) Resolution:**
-   When Zed launches a `stdio` context server, it sets the process working directory (`cwd`) to the root of the worktree containing the **currently active editor tab/file**. If no editor tab is active, Zed falls back to the **first visible worktree** in the project panel. Because `pdf-mcp` permits access to the current working directory by default, relative PDF paths within that active worktree work immediately out of the box.
+   When Zed launches a `stdio` context server, it sets the process working directory (`cwd`) to the root of the worktree containing the **currently active editor tab/file**. If no editor tab is active, Zed falls back to the **first visible worktree** in the project panel. Because `pdf-blick` permits access to the current working directory by default, relative PDF paths within that active worktree work immediately out of the box.
 
 2. **Automatic Server Restarts across Worktrees:**
    In multi-repo or multi-root workspaces, whenever your focus moves to an editor tab belonging to a different worktree, Zed detects the working directory change and **automatically restarts** the `stdio` context server with the new worktree root as its `cwd`.
 
 3. **No Shell Expansion in Zed:**
-   Zed executes `command` and `args` in `settings.json` directly as a subprocess without passing them through an interactive shell, meaning shell expansions like `~/...` or `$HOME/...` are not expanded by Zed itself. Furthermore, Zed does not currently implement the MCP `roots/list` protocol request. To make setup seamless and ergonomic, `pdf-mcp` **natively expands** leading tildes (`~`, `~/...`) and environment variables (`$HOME`, `${VAR}`) across all `--root` arguments, `PDF_MCP_ROOT` environment variables, and tool `path` inputs.
+   Zed executes `command` and `args` in `settings.json` directly as a subprocess without passing them through an interactive shell, meaning shell expansions like `~/...` or `$HOME/...` are not expanded by Zed itself. Furthermore, Zed does not currently implement the MCP `roots/list` protocol request. To make setup seamless and ergonomic, `pdf-blick` **natively expands** leading tildes (`~`, `~/...`) and environment variables (`$HOME`, `${VAR}`) across all `--root` arguments, `PDF_BLICK_ROOT` environment variables, and tool `path` inputs.
 
 4. **Multi-Repo & Shared Folder Access:**
    If you work in a multi-repo workspace or need access to PDF files located in external directories (such as reference libraries or document folders), you can configure access in several ways:
@@ -156,9 +156,9 @@ When using `pdf-mcp` as a context server inside Zed, keep the following runtime 
      ```json
      {
        "context_servers": {
-         "pdf-mcp": {
+         "pdf-blick": {
            "enabled": true,
-           "command": "pdf-mcp",
+           "command": "pdf-blick",
            "args": [
              "run",
              "--root", "~/Documents/Papers",
@@ -168,16 +168,16 @@ When using `pdf-mcp` as a context server inside Zed, keep the following runtime 
        }
      }
      ```
-   - **Environment Variable (`PDF_MCP_ROOT`):**
+   - **Environment Variable (`PDF_BLICK_ROOT`):**
      ```json
      {
        "context_servers": {
-         "pdf-mcp": {
+         "pdf-blick": {
            "enabled": true,
-           "command": "pdf-mcp",
+           "command": "pdf-blick",
            "args": ["run"],
            "env": {
-             "PDF_MCP_ROOT": "~/Documents/Papers:/Volumes/Shared/Reports"
+             "PDF_BLICK_ROOT": "~/Documents/Papers:/Volumes/Shared/Reports"
            }
          }
        }
@@ -241,13 +241,13 @@ Returns an MCP `ImageContent` object with MIME type `image/png` containing the r
 
 ```bash
 # Run over stdio (current working directory allowed)
-pdf-mcp run
+pdf-blick run
 
 # Run with custom allowed roots and working directory disabled
-pdf-mcp run --root ~/Documents/Papers -r /Volumes/Shared --no-workdir
+pdf-blick run --root ~/Documents/Papers -r /Volumes/Shared --no-workdir
 
 # Run with debug logging to stderr
-pdf-mcp run --debug
+pdf-blick run --debug
 ```
 
 ### Direct CLI Tool Invocations (`tool`)
@@ -256,22 +256,22 @@ You can execute tools directly from the terminal without running an MCP server:
 
 ```bash
 # List pages and outline metadata
-pdf-mcp tool list_pages --path document.pdf
+pdf-blick tool list_pages --path document.pdf
 
 # List pages with pagination (pages 1 to 50)
-pdf-mcp tool list_pages --path document.pdf --start-page 1 --end-page 50
+pdf-blick tool list_pages --path document.pdf --start-page 1 --end-page 50
 
 # Render a full page and write directly to a PNG file
-pdf-mcp tool get_page --path document.pdf --page 1 -o page1.png
+pdf-blick tool get_page --path document.pdf --page 1 -o page1.png
 
 # Zoom into a specific region (bounding box)
-pdf-mcp tool get_page --path document.pdf --page 1 --left 0.1 --top 0.2 --right 0.8 --bottom 0.9 -o crop.png
+pdf-blick tool get_page --path document.pdf --page 1 --left 0.1 --top 0.2 --right 0.8 --bottom 0.9 -o crop.png
 
 # Render page rotated by 180 degrees (e.g. for upside-down scans)
-pdf-mcp tool get_page --path document.pdf --page 1 --rotate 180 -o page1_rotated.png
+pdf-blick tool get_page --path document.pdf --page 1 --rotate 180 -o page1_rotated.png
 
 # Render to stdout as JSON
-pdf-mcp tool get_page --path document.pdf --page 1
+pdf-blick tool get_page --path document.pdf --page 1
 ```
 
 ### Bash Completion (`completion`)
@@ -279,7 +279,7 @@ pdf-mcp tool get_page --path document.pdf --page 1
 Generate shell completion for bash:
 
 ```bash
-pdf-mcp completion bash > /usr/local/etc/bash_completion.d/pdf-mcp
+pdf-blick completion bash > /usr/local/etc/bash_completion.d/pdf-blick
 ```
 
 ---
@@ -287,7 +287,7 @@ pdf-mcp completion bash > /usr/local/etc/bash_completion.d/pdf-mcp
 ## Development & Testing
 
 ```bash
-make build    # Build binary (pdf-mcp)
+make build    # Build binary (pdf-blick)
 make test     # Run unit tests
 make fmt      # Format code with gofmt
 make vet      # Run go vet

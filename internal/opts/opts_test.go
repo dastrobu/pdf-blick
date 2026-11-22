@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/dastrobu/pdf-mcp/internal/tools"
+	"github.com/dastrobu/pdf-blick/internal/tools"
 )
 
 func TestParseRunDefaults(t *testing.T) {
@@ -127,18 +127,18 @@ func TestParseRunFlags(t *testing.T) {
 }
 
 func TestParseRunEnvVars(t *testing.T) {
-	t.Setenv("PDF_MCP_ROOT", "/env/dir1:/env/dir2")
-	t.Setenv("PDF_MCP_NO_WORKDIR", "true")
-	t.Setenv("PDF_MCP_DEBUG", "true")
-	t.Setenv("PDF_MCP_DEFAULT_DPI", "180")
-	t.Setenv("PDF_MCP_MIN_DPI", "45")
-	t.Setenv("PDF_MCP_MAX_DPI", "720")
-	t.Setenv("PDF_MCP_MAX_IMAGE_DIMENSION", "3000")
-	t.Setenv("PDF_MCP_DEFAULT_MAX_PAGES", "80")
-	t.Setenv("PDF_MCP_MAX_PAGES_WINDOW", "160")
-	t.Setenv("PDF_MCP_MAX_BOOKMARKS", "120")
-	t.Setenv("PDF_MCP_MAX_ATTACHMENTS", "30")
-	t.Setenv("PDF_MCP_MAX_METADATA_LEN", "300")
+	t.Setenv("PDF_BLICK_ROOT", "/env/dir1:/env/dir2")
+	t.Setenv("PDF_BLICK_NO_WORKDIR", "true")
+	t.Setenv("PDF_BLICK_DEBUG", "true")
+	t.Setenv("PDF_BLICK_DEFAULT_DPI", "180")
+	t.Setenv("PDF_BLICK_MIN_DPI", "45")
+	t.Setenv("PDF_BLICK_MAX_DPI", "720")
+	t.Setenv("PDF_BLICK_MAX_IMAGE_DIMENSION", "3000")
+	t.Setenv("PDF_BLICK_DEFAULT_MAX_PAGES", "80")
+	t.Setenv("PDF_BLICK_MAX_PAGES_WINDOW", "160")
+	t.Setenv("PDF_BLICK_MAX_BOOKMARKS", "120")
+	t.Setenv("PDF_BLICK_MAX_ATTACHMENTS", "30")
+	t.Setenv("PDF_BLICK_MAX_METADATA_LEN", "300")
 
 	options, _, err := ParseArgs([]string{"run"})
 	if err != nil {

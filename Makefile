@@ -1,7 +1,7 @@
 .PHONY: build clean test fmt vet deps tidy check install-hooks doctoc help
 
 # Binary name
-BINARY=pdf-mcp
+BINARY=pdf-blick
 
 # Build the binary
 build:
@@ -49,12 +49,12 @@ help:
 	@echo "Available targets:"
 	@echo "  build         - Build the $(BINARY) binary"
 	@echo "  clean         - Remove build artifacts"
-	@echo "  test          - Run Go tests"
-	@echo "  fmt           - Format Go code"
-	@echo "  vet           - Run go vet"
+	@echo "  test          - Run all tests"
+	@echo "  fmt           - Format all Go source files"
+	@echo "  vet           - Run go vet on all packages"
 	@echo "  deps          - Download and verify dependencies"
-	@echo "  tidy          - Tidy dependencies"
-	@echo "  check         - Run fmt, vet, and test"
-	@echo "  install-hooks - Install git pre-commit hook"
-	@echo "  doctoc        - Update README Table of Contents"
-	@echo "  help          - Display this help message"
+	@echo "  tidy          - Tidy go.mod and go.sum"
+	@echo "  check         - Run format check, vet, and tests"
+	@echo "  install-hooks - Install git pre-commit hooks"
+	@echo "  doctoc        - Update README table of contents"
+	@echo "  help          - Show this help message"

@@ -10,10 +10,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/dastrobu/pdf-mcp/internal/opts"
-	"github.com/dastrobu/pdf-mcp/internal/pdf"
-	"github.com/dastrobu/pdf-mcp/internal/sandbox"
-	"github.com/dastrobu/pdf-mcp/internal/tools"
+	"github.com/dastrobu/pdf-blick/internal/opts"
+	"github.com/dastrobu/pdf-blick/internal/pdf"
+	"github.com/dastrobu/pdf-blick/internal/sandbox"
+	"github.com/dastrobu/pdf-blick/internal/tools"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
