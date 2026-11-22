@@ -155,6 +155,48 @@ func TestE2E_A4Letter_MCP(t *testing.T) {
 	if cropBounds.Dx() <= 0 || cropBounds.Dy() <= 0 {
 		t.Errorf("invalid crop bounds: %v", cropBounds)
 	}
+
+	// 4. Test get_page with 90 degree rotation
+	rotRes, err := clientSession.CallTool(ctx, &mcp.CallToolParams{
+		Name: "get_page",
+		Arguments: map[string]any{
+			"path":   testPDF,
+			"page":   1,
+			"rotate": 90,
+		},
+	})
+	if err != nil || rotRes.IsError {
+		t.Fatalf("CallTool(get_page, rotate=90) failed: err=%v, isError=%v", err, rotRes.IsError)
+	}
+	rotImgContent := rotRes.Content[0].(*mcp.ImageContent)
+	rotImg, _, err := image.Decode(bytes.NewReader(rotImgContent.Data))
+	if err != nil {
+		t.Fatalf("failed to decode rotated PNG: %v", err)
+	}
+	if rotImg.Bounds().Dx() != 1754 || rotImg.Bounds().Dy() != 1241 {
+		t.Errorf("expected 1754x1241 bounds for 90 deg rotation, got %v", rotImg.Bounds())
+	}
+
+	// 5. Test get_page with 180 degree rotation
+	rot180Res, err := clientSession.CallTool(ctx, &mcp.CallToolParams{
+		Name: "get_page",
+		Arguments: map[string]any{
+			"path":   testPDF,
+			"page":   1,
+			"rotate": 180,
+		},
+	})
+	if err != nil || rot180Res.IsError {
+		t.Fatalf("CallTool(get_page, rotation=180) failed: err=%v, isError=%v", err, rot180Res.IsError)
+	}
+	rot180ImgContent := rot180Res.Content[0].(*mcp.ImageContent)
+	rot180Img, _, err := image.Decode(bytes.NewReader(rot180ImgContent.Data))
+	if err != nil {
+		t.Fatalf("failed to decode 180 deg PNG: %v", err)
+	}
+	if rot180Img.Bounds().Dx() != 1241 || rot180Img.Bounds().Dy() != 1754 {
+		t.Errorf("expected 1241x1754 bounds for 180 deg rotation, got %v", rot180Img.Bounds())
+	}
 }
 
 func TestE2E_A4Letter_DirectCLIHandlers(t *testing.T) {
@@ -193,5 +235,29 @@ func TestE2E_A4Letter_DirectCLIHandlers(t *testing.T) {
 	}
 	if info.Size() == 0 {
 		t.Errorf("rendered output file is empty")
+	}
+
+	// Test GetPage CLI handler with rotation
+	rot90 := 90
+	rotOutPath := filepath.Join(t.TempDir(), "rendered_90.png")
+	err = opts.GlobalOpts.Tool.GetPage.Handler(
+		opts.SandboxOpts{},
+		opts.EngineOpts{},
+		tools.GetPageInput{Path: testPDF, Page: 1, Rotate: &rot90},
+		rotOutPath,
+	)
+	if err != nil {
+		t.Fatalf("GetPage CLI handler with rotate=90 failed: %v", err)
+	}
+	rotData, err := os.ReadFile(rotOutPath)
+	if err != nil {
+		t.Fatalf("failed to read rendered rotated file: %v", err)
+	}
+	rotImg, _, err := image.Decode(bytes.NewReader(rotData))
+	if err != nil {
+		t.Fatalf("failed to decode rendered rotated file: %v", err)
+	}
+	if rotImg.Bounds().Dx() != 1754 || rotImg.Bounds().Dy() != 1241 {
+		t.Errorf("expected 1754x1241 bounds for CLI rotate=90, got %v", rotImg.Bounds())
 	}
 }

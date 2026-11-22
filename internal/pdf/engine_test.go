@@ -777,3 +777,115 @@ func TestEngine_A4LetterFixture(t *testing.T) {
 		t.Errorf("expected image bounds 1241x1754, got %v", img.Bounds())
 	}
 }
+
+func TestRenderPage_Rotation(t *testing.T) {
+	pdfPath := filepath.Join("..", "..", "testdata", "A4 Letter.pdf")
+	if _, err := os.Stat(pdfPath); err != nil {
+		t.Skipf("testdata/A4 Letter.pdf not found: %v", err)
+	}
+
+	eng := NewEngine()
+	defer eng.Close()
+	ctx := context.Background()
+
+	intPtr := func(v int) *int { return &v }
+
+	tests := []struct {
+		name           string
+		rotate         *int
+		expectedRotate int
+		expectedWidth  int
+		expectedHeight int
+		expectErr      bool
+		errContains    string
+	}{
+		{
+			name:           "0 degrees default (nil)",
+			rotate:         nil,
+			expectedRotate: 0,
+			expectedWidth:  1241,
+			expectedHeight: 1754,
+		},
+		{
+			name:           "0 degrees explicit",
+			rotate:         intPtr(0),
+			expectedRotate: 0,
+			expectedWidth:  1241,
+			expectedHeight: 1754,
+		},
+		{
+			name:           "90 degrees clockwise",
+			rotate:         intPtr(90),
+			expectedRotate: 90,
+			expectedWidth:  1754,
+			expectedHeight: 1241,
+		},
+		{
+			name:           "180 degrees portrait upside down",
+			rotate:         intPtr(180),
+			expectedRotate: 180,
+			expectedWidth:  1241,
+			expectedHeight: 1754,
+		},
+		{
+			name:           "270 degrees clockwise",
+			rotate:         intPtr(270),
+			expectedRotate: 270,
+			expectedWidth:  1754,
+			expectedHeight: 1241,
+		},
+		{
+			name:           "negative angle -90",
+			rotate:         intPtr(-90),
+			expectedRotate: 270,
+			expectedWidth:  1754,
+			expectedHeight: 1241,
+		},
+		{
+			name:           "full circle 360",
+			rotate:         intPtr(360),
+			expectedRotate: 0,
+			expectedWidth:  1241,
+			expectedHeight: 1754,
+		},
+		{
+			name:        "invalid angle 45",
+			rotate:      intPtr(45),
+			expectErr:   true,
+			errContains: "must be a multiple of 90 degrees",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			res, err := eng.RenderPage(ctx, RenderOptions{Path: pdfPath, Page: 1, Rotate: tc.rotate})
+			if tc.expectErr {
+				if err == nil {
+					t.Fatalf("expected error containing %q, got nil", tc.errContains)
+				}
+				if tc.errContains != "" && !strings.Contains(err.Error(), tc.errContains) {
+					t.Errorf("expected error containing %q, got: %v", tc.errContains, err)
+				}
+				return
+			}
+
+			if err != nil {
+				t.Fatalf("RenderPage failed: %v", err)
+			}
+			if res.Rotate != tc.expectedRotate {
+				t.Errorf("expected Rotate %d, got %d", tc.expectedRotate, res.Rotate)
+			}
+			if res.WidthPx != tc.expectedWidth || res.HeightPx != tc.expectedHeight {
+				t.Errorf("expected dimensions %dx%d, got %dx%d", tc.expectedWidth, tc.expectedHeight, res.WidthPx, res.HeightPx)
+			}
+
+			img, err := png.Decode(bytes.NewReader(res.PNGBytes))
+			if err != nil {
+				t.Fatalf("failed to decode PNG: %v", err)
+			}
+			if img.Bounds().Dx() != tc.expectedWidth || img.Bounds().Dy() != tc.expectedHeight {
+				t.Errorf("expected decoded image bounds %dx%d, got %v", tc.expectedWidth, tc.expectedHeight, img.Bounds())
+			}
+		})
+	}
+}

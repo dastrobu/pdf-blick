@@ -123,6 +123,7 @@ func TestListPagesInputJSONRoundTrip(t *testing.T) {
 
 func TestJSONRoundTrip(t *testing.T) {
 	dpi := 300
+	rot := 180
 	left := 0.1
 	top := 0.2
 	right := 0.8
@@ -132,6 +133,7 @@ func TestJSONRoundTrip(t *testing.T) {
 		Path:   "example.pdf",
 		Page:   2,
 		DPI:    &dpi,
+		Rotate: &rot,
 		Left:   &left,
 		Top:    &top,
 		Right:  &right,
@@ -154,6 +156,9 @@ func TestJSONRoundTrip(t *testing.T) {
 	if out.DPI == nil || *out.DPI != dpi {
 		t.Fatalf("mismatched DPI: got %v, want %v", out.DPI, dpi)
 	}
+	if out.Rotate == nil || *out.Rotate != rot {
+		t.Fatalf("mismatched Rotate: got %v, want %v", out.Rotate, rot)
+	}
 	if out.Left == nil || *out.Left != left {
 		t.Fatalf("mismatched Left: got %v, want %v", out.Left, left)
 	}
@@ -167,15 +172,16 @@ func TestJSONRoundTrip(t *testing.T) {
 		t.Fatalf("mismatched Bottom: got %v, want %v", out.Bottom, bottom)
 	}
 
-	// Verify omitted DPI decodes to nil
+	// Verify omitted DPI and Rotate decode to nil
 	emptyJSON := `{"path":"empty.pdf","page":1}`
 	var emptyOut GetPageInput
 	if err := json.Unmarshal([]byte(emptyJSON), &emptyOut); err != nil {
 		t.Fatalf("failed to unmarshal empty JSON: %v", err)
 	}
-	if emptyOut.DPI != nil {
-		t.Fatalf("expected nil DPI when omitted, got %v", emptyOut.DPI)
+	if emptyOut.DPI != nil || emptyOut.Rotate != nil {
+		t.Fatalf("expected nil DPI and Rotate when omitted, got %v, %v", emptyOut.DPI, emptyOut.Rotate)
 	}
+
 }
 
 const sampleMinimalPDF = `%PDF-1.4
@@ -294,6 +300,41 @@ func TestEndToEndMCPProtocol(t *testing.T) {
 	}
 	if decodedImg.Bounds().Dx() < 1273 || decodedImg.Bounds().Dx() > 1277 || decodedImg.Bounds().Dy() < 1648 || decodedImg.Bounds().Dy() > 1653 {
 		t.Fatalf("unexpected image dimensions at 150 DPI for US Letter: %v", decodedImg.Bounds())
+	}
+
+	// 2b. Test get_page with 90 degree rotation via MCP client
+	rotRes, err := clientSession.CallTool(ctx, &mcp.CallToolParams{
+		Name:      "get_page",
+		Arguments: map[string]any{"path": "doc.pdf", "page": 1, "rotate": 90},
+	})
+	if err != nil || rotRes.IsError {
+		t.Fatalf("CallTool(get_page rotate 90) failed: err=%v, isError=%v", err, rotRes.IsError)
+	}
+	rotImgContent := rotRes.Content[0].(*mcp.ImageContent)
+	rotImg, err := png.Decode(bytes.NewReader(rotImgContent.Data))
+	if err != nil {
+		t.Fatalf("failed to decode rotated PNG: %v", err)
+	}
+	// For US Letter at 150 DPI, normal is ~1275x1650, rotated 90 is ~1650x1275
+	if rotImg.Bounds().Dx() < 1648 || rotImg.Bounds().Dx() > 1653 || rotImg.Bounds().Dy() < 1273 || rotImg.Bounds().Dy() > 1277 {
+		t.Fatalf("expected rotated 90 deg dimensions ~1650x1275, got %v", rotImg.Bounds())
+	}
+
+	// 2c. Test get_page with 180 degree rotation via MCP client
+	rot180Res, err := clientSession.CallTool(ctx, &mcp.CallToolParams{
+		Name:      "get_page",
+		Arguments: map[string]any{"path": "doc.pdf", "page": 1, "rotate": 180},
+	})
+	if err != nil || rot180Res.IsError {
+		t.Fatalf("CallTool(get_page rotation 180) failed: err=%v, isError=%v", err, rot180Res.IsError)
+	}
+	rot180ImgContent := rot180Res.Content[0].(*mcp.ImageContent)
+	rot180Img, err := png.Decode(bytes.NewReader(rot180ImgContent.Data))
+	if err != nil {
+		t.Fatalf("failed to decode 180 deg PNG: %v", err)
+	}
+	if rot180Img.Bounds().Dx() < 1273 || rot180Img.Bounds().Dx() > 1277 || rot180Img.Bounds().Dy() < 1648 || rot180Img.Bounds().Dy() > 1653 {
+		t.Fatalf("expected 180 deg dimensions ~1275x1650, got %v", rot180Img.Bounds())
 	}
 
 	// 3. Test get_page with bounding box zoom (0.25 x 0.25 -> auto-scales to 600 DPI -> same 1275x1650 dimensions!)
